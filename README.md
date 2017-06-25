@@ -58,6 +58,7 @@ username = username@example.com
 saml_config_id = 12345
 profile_name = username@example.com
 ```
+If profile_name is not specified, [default] section in `~/.aws/credentials` will be used.
 
 ## Session File
 A file named `~/.lp_session` stores the lastpass session so a second execution of this script which cookie timeout doesn't require password entry.
