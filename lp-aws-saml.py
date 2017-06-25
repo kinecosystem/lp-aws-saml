@@ -295,7 +295,7 @@ def aws_set_profile(profile_name, response):
     ConfigParser.DEFAULTSECT = 'default'
     config.read(config_fn)
 
-    if profile_name == 'default':
+    if profile_name == ConfigParser.DEFAULTSECT:
         section = ConfigParser.DEFAULTSECT
     else:
         section = profile_name
@@ -347,7 +347,7 @@ def main():
 
     username = args.username
     saml_cfg_id = args.saml_config_id
-    quiet = bool(args.silent_on_success == 'True')
+    quiet = (args.silent_on_success == 'True')
 
     if args.profile_name is not None:
         profile_name = args.profile_name
@@ -361,7 +361,7 @@ def main():
         assertion = get_saml_token(session, username, saml_cfg_id)
     except KeyError:
         password = getpass()
-        otp = input("OTP: ")
+        otp = input("2FA: ")
         lastpass_login(session, username, password, otp)
         save_cookies(session, COOKIE_FILE)
         assertion = get_saml_token(session, username, saml_cfg_id, password)
