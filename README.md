@@ -49,6 +49,11 @@ This token expires in one hour.
 Once completed, the `aws` tool may be used to execute commands as that
 user by specifying the appropriate profile.
 
+Using the flag `--print-eval`, the output will be eval-able exports with the AWS_* credentials, such as:
+```
+export AWS_ACCESS_KEY_ID=AXXXXXXX AWS_SECRET_ACCESS_KEY=2DXXXXXXXX AWS_SESSION_TOKEN=FQXXXXX==
+```
+
 ## Config File
 You can put a config file in your home dir instead of passing parameters to the script.
 Name the file `~/.lp_config` with the following content:
