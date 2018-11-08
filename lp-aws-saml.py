@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf8 -*-
 #
 # Amazon Web Services CLI - LastPass SAML integration
@@ -259,16 +259,16 @@ def prompt_for_role(roles):
     if len(roles) == 1:
         return roles[0]
 
-    print 'Please select a role:'
+    print '# Please select a role:'
     count = 1
     for r in roles:
-        print '  %d) %s' % (count, r[0])
+        print '#  %d) %s' % (count, r[0])
         count = count + 1
 
     choice = 0
     while choice < 1 or choice > len(roles) + 1:
         try:
-            choice = int(input("Choice: "))
+            choice = int(input("# Choice: "))
         except ValueError:
             choice = 0
 
@@ -283,7 +283,7 @@ def aws_assume_role(session, assertion, role_arn, principal_arn):
         SAMLAssertion=b64encode(assertion))
 
 
-def aws_set_profile(profile_name, response):
+def aws_set_profile(profile_name, response, print_eval=False):
     """
     Save AWS credentials returned from Assume Role operation in
     ~/.aws/credentials INI file.  The credentials are saved in
@@ -309,15 +309,20 @@ def aws_set_profile(profile_name, response):
     except OSError:
         pass
 
-    config.set(section, 'aws_access_key_id',
-               response['Credentials']['AccessKeyId'])
-    config.set(section, 'aws_secret_access_key',
-               response['Credentials']['SecretAccessKey'])
-    config.set(section, 'aws_session_token',
-               response['Credentials']['SessionToken'])
+    if print_eval:
+        return ('export AWS_ACCESS_KEY_ID=' + response['Credentials']['AccessKeyId'] +
+                ' AWS_SECRET_ACCESS_KEY=' + response['Credentials']['SecretAccessKey'] +
+                ' AWS_SESSION_TOKEN=' + response['Credentials']['SessionToken'])
+    else:
+        config.set(section, 'aws_access_key_id',
+                   response['Credentials']['AccessKeyId'])
+        config.set(section, 'aws_secret_access_key',
+                   response['Credentials']['SecretAccessKey'])
+        config.set(section, 'aws_session_token',
+                   response['Credentials']['SessionToken'])
 
-    with open(config_fn, 'w') as out:
-        config.write(out)
+        with open(config_fn, 'w') as out:
+            config.write(out)
 
 
 def read_lp_config():
@@ -341,7 +346,8 @@ def main():
                         help='the lastpass SAML config id')
     parser.add_argument('--profile-name', dest='profile_name', default=defaults['profile_name'],
                         help='the name of AWS profile to save the data in (default username)')
-    parser.add_argument('--silent-on-success', type=str, default='False', help='dont print anything on success')
+    parser.add_argument('--silent-on-success', type=bool, const=True, nargs='?', default=False, help='dont print anything on success')
+    parser.add_argument('--print-eval', type=bool, const=True, nargs='?', default=False, help='print out eval-able exports')
 
     args = parser.parse_args()
 
@@ -372,15 +378,17 @@ def main():
     role = prompt_for_role(roles)
 
     response = aws_assume_role(session, assertion, role[0], role[1])
-    aws_set_profile(profile_name, response)
+    eval_output = aws_set_profile(profile_name, response, args.print_eval)
 
-    if not quiet:
-        print "A new AWS CLI profile '%s' has been added." % profile_name
-        print "You may now invoke the aws CLI tool as follows:"
+    if eval_output:
+        print eval_output
+    elif not quiet:
+        print "# A new AWS CLI profile '%s' has been added." % profile_name
+        print "# You may now invoke the aws CLI tool as follows:"
         print
-        print "    aws --profile %s [...] " % profile_name
+        print "#     aws --profile %s [...] " % profile_name
         print
-        print "This token expires in one hour."
+        print "# This token expires in one hour."
 
 
 if __name__ == "__main__":
