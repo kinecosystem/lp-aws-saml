@@ -76,3 +76,7 @@ export AWS_SESSION_TOKEN=$(sed -nr "/^\[username@example.com\]/ { :l /^aws_sessi
 export AWS_SECRET_ACCESS_KEY=$(sed -nr "/^\[username@example.com\]/ { :l /^aws_secret_access_key[ ]*=/ { s/aws_secret_access_key = [ ]*//; p; q;}; n; b l;}" ~/.aws/credentials)
 export AWS_SECURITY_TOKEN=$AWS_SESSION_TOKEN
 ```
+## Known errors
+
+Getting `sed: illegal option -- r` after `AWS additional configuration` on `macOS Mojave 10.14.2`
+Solution: `brew install gnu-sed` and use `gsend` instead of `sed` in  `AWS additional configuration`.
